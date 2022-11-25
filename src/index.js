@@ -1,7 +1,22 @@
 import './css/styles.css';
-import { apiService } from './js/apiService.js';
+// import axios from 'axios';
+import { getPictures } from './js/apiService.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+
+const form = document.querySelector('#search-form');
+
+form.addEventListener('submit', onSubmit);
+
+function onSubmit(e) {
+  e.preventDefault();
+  try {
+    getPictures();
+  } catch (error) {
+    console.log(error);
+  }
+  //   renderMarkup(params);
+}
 
 function renderMarkup(params) {
   `<div class="photo-card">
