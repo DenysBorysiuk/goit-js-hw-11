@@ -43,7 +43,7 @@ function renderMarkup({ data: { hits, totalHits } }) {
           downloads,
         }) => {
           return `<a class="gallery-link" href="${largeImageURL}">
-  <img class="gallery-image" src="${webformatURL}" height="200px" alt="${tags}" data-source="${largeImageURL}" loading="lazy" />
+  <img class="gallery-image" src="${webformatURL}" width="400px" height="250px" alt="${tags}" data-source="${largeImageURL}" loading="lazy" />
   <div class="info">
      <p class="info-item">
        <b>Likes</b>
