@@ -31,7 +31,6 @@ function onSubmit(e) {
   }
   getImages(searchTerm, page)
     .then(resp => {
-      // console.log(resp.data);
       if (resp.data.totalHits === 0) {
         searchTerm = '';
         return Notify.failure(
@@ -39,7 +38,7 @@ function onSubmit(e) {
         );
       }
       Notify.success(`"Hooray! We found ${resp.data.totalHits} images."`);
-      gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data));
+      gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data.hits));
       observer.observe(guard);
       lightbox.refresh();
     })
@@ -47,13 +46,12 @@ function onSubmit(e) {
 }
 
 function onLoad(entries, observer) {
-  // console.log(observer);
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       getImages(searchTerm, page)
         .then(resp => {
           page += 1;
-          gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data));
+          gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data.hits));
           lightbox.refresh();
           if (resp.data.hits < 40) {
             observer.unobserve(guard);
@@ -64,19 +62,19 @@ function onLoad(entries, observer) {
           }
         })
         .catch(error => {
-          console.log(error);
-          observer.unobserve(guard);
-          return Notify.failure(
-            "We're sorry, but you've reached the end of search results."
-          );
+          if (error.response) {
+            observer.unobserve(guard);
+            Notify.failure(
+              "We're sorry, but you've reached the end of search results."
+            );
+          }
         });
     }
   });
 }
 
-function createMarkup({ hits }) {
-  // console.log(data);
-  return hits
+function createMarkup(arr) {
+  return arr
     .map(
       ({
         webformatURL,
@@ -112,69 +110,3 @@ function createMarkup({ hits }) {
     )
     .join('');
 }
-
-// const { height: cardHeight } = document
-//   .querySelector('.gallery')
-//   .firstElementChild.getBoundingClientRect();
-
-// window.scrollBy({
-//   top: cardHeight * 2,
-//   behavior: 'smooth',
-// });
-
-// function renderMarkup({ data: { hits, totalHits } }) {
-//   // console.log(data);
-//   if (totalHits === 0) {
-//     searchTerm = '';
-//     Notify.failure(
-//       'Sorry, there are no images matching your search query. Please try again.'
-//     );
-//   } else {
-//     totalFind = totalHits;
-//     const markup = hits
-//       .map(
-//         ({
-//           webformatURL,
-//           largeImageURL,
-//           tags,
-//           likes,
-//           views,
-//           comments,
-//           downloads,
-//         }) => {
-//           return `<a class="gallery-link" href="${largeImageURL}">
-//   <img class="gallery-image" src="${webformatURL}" width="400px" height="250px" alt="${tags}" data-source="${largeImageURL}" loading="lazy" />
-//   <div class="info">
-//      <p class="info-item">
-//        <b>Likes</b>
-//        ${likes}
-//      </p>
-//      <p class="info-item">
-//        <b>Views</b>
-//        ${views}
-//      </p>
-//      <p class="info-item">
-//        <b>Comments</b>
-//        ${comments}
-//      </p>
-//      <p class="info-item">
-//        <b>Downloads</b>
-//        ${downloads}
-//      </p>
-//    </div>
-//    </a>`;
-//         }
-//       )
-//       .join('');
-
-//     gallery.insertAdjacentHTML('beforeend', markup);
-//     var lightbox = new SimpleLightbox('.gallery a', {
-//       /* options */
-//       captionSelector: 'img',
-//       captionType: 'attr',
-//       captionsData: 'alt',
-//       captionPosition: 'bottom',
-//       captionDelay: 250,
-//     });
-//   }
-// }

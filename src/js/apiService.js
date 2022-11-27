@@ -8,17 +8,3 @@ export async function getImages(searchTerm, page) {
     `${BASE_URL}?key=${API_KEY}&q=${searchTerm}&image_type=photo&orientation=horizontal&page=${page}&per_page=40&safesearch=true`
   );
 }
-
-// export async function getPictures() {
-//   try {
-//     const response = await axios.get({
-//       baseURL: 'https://pixabay.com/api/',
-//       params: {
-//         KEY: '31604324-7a50cb95f9ef385a3991a2501',
-//       },
-//     });
-//     console.log(response);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
