@@ -1,12 +1,11 @@
 import './css/styles.css';
 import { getImages } from './js/apiService';
+import { createMarkup } from './js/createMarkup';
+import refs from './js/refs';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const form = document.querySelector('#search-form');
-const gallery = document.querySelector('.gallery');
-const guard = document.querySelector('.js-guard');
 const options = {
   root: null,
   rootMargin: '100px',
@@ -17,12 +16,12 @@ let page = 1;
 var lightbox = new SimpleLightbox('.gallery a');
 const observer = new IntersectionObserver(onLoad, options);
 
-form.addEventListener('submit', onSubmit);
+refs.form.addEventListener('submit', onSubmit);
 
 function onSubmit(e) {
   e.preventDefault();
   searchTerm = e.target.searchQuery.value;
-  gallery.innerHTML = '';
+  refs.gallery.innerHTML = '';
   page = 1;
   if (searchTerm === '') {
     return Notify.failure(
@@ -38,8 +37,11 @@ function onSubmit(e) {
         );
       }
       Notify.success(`"Hooray! We found ${resp.data.totalHits} images."`);
-      gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data.hits));
-      observer.observe(guard);
+      refs.gallery.insertAdjacentHTML(
+        'beforeend',
+        createMarkup(resp.data.hits)
+      );
+      observer.observe(refs.guard);
       lightbox.refresh();
     })
     .catch(error => console.log(error));
@@ -51,10 +53,13 @@ function onLoad(entries, observer) {
       getImages(searchTerm, page)
         .then(resp => {
           page += 1;
-          gallery.insertAdjacentHTML('beforeend', createMarkup(resp.data.hits));
+          refs.gallery.insertAdjacentHTML(
+            'beforeend',
+            createMarkup(resp.data.hits)
+          );
           lightbox.refresh();
           if (resp.data.hits < 40) {
-            observer.unobserve(guard);
+            observer.unobserve(refs.guard);
             searchTerm = '';
             return Notify.failure(
               "We're sorry, but you've reached the end of search results."
@@ -63,7 +68,7 @@ function onLoad(entries, observer) {
         })
         .catch(error => {
           if (error.response) {
-            observer.unobserve(guard);
+            observer.unobserve(refs.guard);
             Notify.failure(
               "We're sorry, but you've reached the end of search results."
             );
@@ -71,42 +76,4 @@ function onLoad(entries, observer) {
         });
     }
   });
-}
-
-function createMarkup(arr) {
-  return arr
-    .map(
-      ({
-        webformatURL,
-        largeImageURL,
-        tags,
-        likes,
-        views,
-        comments,
-        downloads,
-      }) => {
-        return `<a class="gallery-link" href="${largeImageURL}">
-  <img class="gallery-image" src="${webformatURL}" width="400px" height="250px" alt="${tags}" data-source="${largeImageURL}" loading="lazy" />
-  <div class="info">
-     <p class="info-item">
-       <b>Likes</b>
-       ${likes}
-     </p>
-     <p class="info-item">
-       <b>Views</b>
-       ${views}
-     </p>
-     <p class="info-item">
-       <b>Comments</b>
-       ${comments}
-     </p>
-     <p class="info-item">
-       <b>Downloads</b>
-       ${downloads}
-     </p>
-   </div>
-   </a>`;
-      }
-    )
-    .join('');
 }
